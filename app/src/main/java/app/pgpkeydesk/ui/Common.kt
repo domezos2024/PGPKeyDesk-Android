@@ -131,9 +131,9 @@ fun PassphraseField(value: String, onChange: (String) -> Unit, label: String, mo
 }
 
 @Composable
-fun KeyTextField(value: String, onChange: (String) -> Unit, label: String, modifier: Modifier = Modifier, minLines: Int = 4) {
+fun KeyTextField(value: String, onChange: (String) -> Unit, label: String, modifier: Modifier = Modifier, minLines: Int = 3, maxLines: Int = 5) {
     OutlinedTextField(
-        value = value, onValueChange = onChange, label = { Text(label) }, minLines = minLines, maxLines = 10,
+        value = value, onValueChange = onChange, label = { Text(label) }, minLines = minLines, maxLines = maxLines,
         modifier = modifier.fillMaxWidth(),
         textStyle = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace, fontSize = 11.sp),
         keyboardOptions = KeyboardOptions(autoCorrectEnabled = false)

@@ -102,7 +102,7 @@ fun EncryptScreen(vm: AppViewModel) {
 
     Column16(Modifier.verticalScroll(scroll).padding(16.dp)) {
         SectionCard(stringResource(R.string.step_recipient)) {
-            KeyTextField(recipient, { recipient = it; output = "" }, stringResource(R.string.recipient_public_key), minLines = 4)
+            KeyTextField(recipient, { recipient = it; output = "" }, stringResource(R.string.recipient_public_key), minLines = 3)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(onClick = { picker = true }) { Text(stringResource(R.string.keyring)) }
                 OutlinedButton(onClick = { recipient = Clipboard.paste(ctx); output = "" }) { Text(stringResource(R.string.paste)) }

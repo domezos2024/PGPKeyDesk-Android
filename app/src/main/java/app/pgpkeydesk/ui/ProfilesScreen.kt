@@ -232,13 +232,13 @@ private fun AddProfilePane(vm: AppViewModel, prefill: String, onDone: () -> Unit
         PaneHeader(stringResource(R.string.import_profile), onDone)
         Column16(Modifier.padding(16.dp)) {
             OutlinedTextField(name, { name = it }, label = { Text(stringResource(R.string.profile_name)) }, singleLine = true, modifier = Modifier.fillMaxWidth())
-            KeyTextField(priv, { priv = it; error = null }, stringResource(R.string.private_key), minLines = 5)
+            KeyTextField(priv, { priv = it; error = null }, stringResource(R.string.private_key), minLines = 3)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(onClick = { priv = Clipboard.paste(ctx) }) { Text(stringResource(R.string.paste)) }
                 OutlinedButton(onClick = { loadPriv.launch(arrayOf("*/*")) }) { Text(stringResource(R.string.import_file)) }
             }
             keyStatus(ctx, pv)
-            KeyTextField(pub, { pub = it; error = null }, stringResource(R.string.public_key_optional), minLines = 4)
+            KeyTextField(pub, { pub = it; error = null }, stringResource(R.string.public_key_optional), minLines = 3)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(onClick = { pub = Clipboard.paste(ctx) }) { Text(stringResource(R.string.paste)) }
                 OutlinedButton(onClick = { loadPub.launch(arrayOf("*/*")) }) { Text(stringResource(R.string.import_file)) }

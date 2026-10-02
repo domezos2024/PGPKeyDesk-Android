@@ -127,7 +127,7 @@ private fun AddKeyDialog(vm: AppViewModel, prefill: String, onDismiss: () -> Uni
         text = {
             Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(name, { name = it }, label = { Text(stringResource(R.string.name_optional)) }, singleLine = true, modifier = Modifier.fillMaxWidth())
-                KeyTextField(text, { text = it; error = null }, stringResource(R.string.public_key), minLines = 5)
+                KeyTextField(text, { text = it; error = null }, stringResource(R.string.public_key), minLines = 3)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedButton(onClick = { text = Clipboard.paste(ctx); error = null }) { Text(stringResource(R.string.paste)) }
                     OutlinedButton(onClick = { load.launch(arrayOf("*/*")) }) { Text(stringResource(R.string.import_file)) }

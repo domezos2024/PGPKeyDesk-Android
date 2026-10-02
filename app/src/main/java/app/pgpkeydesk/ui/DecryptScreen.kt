@@ -109,7 +109,7 @@ fun DecryptScreen(vm: AppViewModel, onOpenProfiles: () -> Unit) {
             onImport = { vm.profilesAction = ProfilesAction.IMPORT }
         )
         if (profile != null) SectionCard(stringResource(R.string.step_message)) {
-            KeyTextField(cipher, { cipher = it; result = null }, stringResource(R.string.pgp_message), minLines = 6)
+            KeyTextField(cipher, { cipher = it; result = null }, stringResource(R.string.pgp_message), minLines = 4, maxLines = 6)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(onClick = { cipher = Clipboard.paste(ctx); result = null }) { Text(stringResource(R.string.paste)) }
                 OutlinedButton(onClick = { openFile.launch(arrayOf("*/*")) }) { Text(stringResource(R.string.open_file)) }
