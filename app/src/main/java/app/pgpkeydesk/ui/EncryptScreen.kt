@@ -59,6 +59,7 @@ fun EncryptScreen(vm: AppViewModel) {
     var busy by remember { mutableStateOf(false) }
     var picker by remember { mutableStateOf(false) }
     val snack = LocalSnackbar.current
+    val focus = androidx.compose.ui.platform.LocalFocusManager.current
     val scroll = rememberScrollState()
     LaunchedEffect(output) { if (output.isNotEmpty()) { delay(150); scroll.animateScrollTo(scroll.maxValue) } }
     val profile = vm.selectedProfile
@@ -87,6 +88,7 @@ fun EncryptScreen(vm: AppViewModel) {
                     PgpService.encryptText(plain, trimmed, if (signing) profile!!.privateKey else null, if (signing) pw else null)
                 }
                 if (signing) pass = ""
+                focus.clearFocus()
                 val done = ctx.getString(if (signing) R.string.encrypted_signed else R.string.encrypted)
                 status = if (c.level == KeyCheckLevel.WARNING) Status("$done ${ctx.checkText(c)}", Kind.WARN) else Status(done, Kind.OK)
             } catch (e: Throwable) {

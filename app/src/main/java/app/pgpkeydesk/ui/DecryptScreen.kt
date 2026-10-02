@@ -54,6 +54,7 @@ fun DecryptScreen(vm: AppViewModel, onOpenProfiles: () -> Unit) {
     var busy by remember { mutableStateOf(false) }
     var picker by remember { mutableStateOf(false) }
     val snack = LocalSnackbar.current
+    val focus = androidx.compose.ui.platform.LocalFocusManager.current
     val scroll = rememberScrollState()
     LaunchedEffect(result) { if (result != null) { delay(150); scroll.animateScrollTo(scroll.maxValue) } }
     val profile = vm.selectedProfile
@@ -86,6 +87,7 @@ fun DecryptScreen(vm: AppViewModel, onOpenProfiles: () -> Unit) {
                 }
                 result = r
                 pass = ""
+                focus.clearFocus()
                 status = when (r.signature) {
                     SignatureStatus.VALID -> Status(ctx.getString(R.string.sig_valid, sender?.name.orEmpty()), Kind.OK)
                     SignatureStatus.INVALID -> Status(ctx.getString(R.string.sig_invalid, sender?.name.orEmpty()), Kind.ERROR)
