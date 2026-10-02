@@ -1,5 +1,6 @@
 package app.pgpkeydesk.data
 
+import androidx.core.content.edit
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
@@ -25,7 +26,7 @@ object AppSettings {
     fun applyTheme(context: Context) = AppCompatDelegate.setDefaultNightMode(theme(context).nightMode)
 
     fun setTheme(context: Context, mode: ThemeMode) {
-        context.getSharedPreferences(PREFS, 0).edit().putString(KEY_THEME, mode.name).apply()
+        context.getSharedPreferences(PREFS, 0).edit { putString(KEY_THEME, mode.name) }
         AppCompatDelegate.setDefaultNightMode(mode.nightMode)
     }
 

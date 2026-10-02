@@ -151,7 +151,7 @@ fun Context.describeExpiry(expiresAt: Instant?, now: Instant = Instant.now()): S
     return when (KeyExpiry.evaluate(expiresAt, now)) {
         KeyExpiryStatus.NEVER_EXPIRES -> getString(R.string.key_never_expires)
         KeyExpiryStatus.EXPIRED -> getString(R.string.key_expired_on, date)
-        KeyExpiryStatus.EXPIRING_SOON -> getString(R.string.key_expires_in, KeyExpiry.daysLeft(expiresAt!!, now).toInt(), date)
+        KeyExpiryStatus.EXPIRING_SOON -> KeyExpiry.daysLeft(expiresAt!!, now).toInt().let { resources.getQuantityString(R.plurals.key_expires_in, it, it, date) }
         KeyExpiryStatus.VALID -> getString(R.string.key_valid_until, date)
     }
 }

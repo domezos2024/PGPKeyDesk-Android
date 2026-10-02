@@ -373,7 +373,7 @@ object PgpService {
 
     // ------------------------------------------------------------ helpers
 
-    private fun newArmor(out: OutputStream) = ArmoredOutputStream(out).apply { setHeader("Version", "PGPKeyDesk") }
+    private fun newArmor(out: OutputStream) = ArmoredOutputStream.builder().setVersion("PGPKeyDesk").build(out)
 
     internal fun armor(write: (OutputStream) -> Unit): String {
         val bytes = ByteArrayOutputStream()
