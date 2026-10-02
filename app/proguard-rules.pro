@@ -1,0 +1,5 @@
+-keep class org.bouncycastle.** { *; }
+-dontwarn org.bouncycastle.**
+-dontwarn javax.naming.**
+-keepclassmembers class app.pgpkeydesk.data.** { *** Companion; }
+-keep,includedescriptorclasses class app.pgpkeydesk.data.**$$serializer { *; }

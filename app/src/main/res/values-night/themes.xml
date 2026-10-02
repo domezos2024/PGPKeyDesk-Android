@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.PGPKeyDesk" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">#1E1E2E</item>
+    </style>
+</resources>
