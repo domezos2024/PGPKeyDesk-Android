@@ -66,7 +66,7 @@
     <string name="encrypted">Successfully encrypted.</string>
     <string name="encrypted_signed">Signed and encrypted successfully.</string>
     <string name="select_file">Select file</string>
-    <string name="recipient">Recipient (to encrypt / verify)</string>
+    <string name="recipient">Recipient</string>
     <string name="sender_or_signer">Sender / signer (to verify)</string>
     <string name="ascii_armor">ASCII armor (text output)</string>
     <string name="also_sign">Also sign when encrypting</string>

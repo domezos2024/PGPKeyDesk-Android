@@ -66,7 +66,7 @@
     <string name="encrypted">Erfolgreich verschlüsselt.</string>
     <string name="encrypted_signed">Erfolgreich signiert und verschlüsselt.</string>
     <string name="select_file">Datei auswählen</string>
-    <string name="recipient">Empfänger (zum Verschlüsseln)</string>
+    <string name="recipient">Empfänger</string>
     <string name="sender_or_signer">Absender / Unterzeichner (zum Prüfen)</string>
     <string name="ascii_armor">ASCII-Armor (Textausgabe)</string>
     <string name="also_sign">Beim Verschlüsseln zusätzlich signieren</string>
