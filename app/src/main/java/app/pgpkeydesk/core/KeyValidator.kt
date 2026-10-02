@@ -60,8 +60,9 @@ object KeyValidator {
             return KeyValidationResult(false, "Missing $PUBLIC_HEADER header.")
         }
         return try {
-            val ring = readPublicRings(text).keyRings.asSequence()
-                .firstOrNull { r -> r.publicKeys.asSequence().any { it.isMasterKey } }
+            val rings = readPublicRings(text).keyRings.asSequence().toList()
+            android.util.Log.d("KeyValidator", "public rings=${rings.size} keys=${rings.map { r -> r.publicKeys.asSequence().map { it.isMasterKey }.toList() }} len=${text.length}")
+            val ring = rings.firstOrNull { r -> r.publicKeys.asSequence().any { it.isMasterKey } }
                 ?: return KeyValidationResult(false, "No master key found in key block.")
             val master = ring.publicKeys.asSequence().first { it.isMasterKey }
             encryptionExpiry(details(master), master, ring)
