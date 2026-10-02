@@ -122,9 +122,9 @@ fun DecryptScreen(vm: AppViewModel, onOpenProfiles: () -> Unit) {
                 OutlinedButton(onClick = { picker = true }) { Text(sender?.name ?: stringResource(R.string.pick_from_keyring)) }
                 if (sender != null) TextButton(onClick = { sender = null }) { Text(stringResource(R.string.remove)) }
             }
-            PassphraseField(pass, { pass = it }, stringResource(R.string.passphrase), onDone = { if (!busy && profile != null && cipher.isNotBlank()) decrypt() })
+            PassphraseField(pass, { pass = it }, stringResource(R.string.passphrase), onDone = { if (!busy && cipher.isNotBlank()) decrypt() })
             Button(
-                onClick = ::decrypt, enabled = !busy && profile != null && cipher.isNotBlank() && pass.isNotEmpty(),
+                onClick = ::decrypt, enabled = !busy && cipher.isNotBlank() && pass.isNotEmpty(),
                 modifier = Modifier.fillMaxWidth()
             ) { Text(stringResource(R.string.decrypt)) }
             if (busy) Busy(stringResource(R.string.decrypting)) else StatusLine(status)

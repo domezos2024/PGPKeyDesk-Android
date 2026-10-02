@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">PGPKeyDesk</string>
     <string name="tab_decrypt">Decrypt</string>
     <string name="tab_encrypt">Encrypt</string>
@@ -11,7 +11,10 @@
     <string name="show_hide">Show or hide</string>
     <string name="key_never_expires">never expires</string>
     <string name="key_expired_on">EXPIRED on %1$s</string>
-    <string name="key_expires_in">expires in %1$d day(s) (%2$s)</string>
+    <plurals name="key_expires_in">
+        <item quantity="one">expires in %1$d day (%2$s)</item>
+        <item quantity="other">expires in %1$d days (%2$s)</item>
+    </plurals>
     <string name="key_valid_until">valid until %1$s</string>
     <string name="check_invalid">Invalid public key: %1$s</string>
     <string name="check_revoked">This key has been revoked.</string>
@@ -30,8 +33,6 @@
     <string name="keyring_empty_long">The keyring is empty. Tap + to add a recipient\'s public key.</string>
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
-    <string name="no_profile_hint">No profile selected. A profile (your private key) is needed to decrypt or sign.</string>
-    <string name="open_profiles">Open profiles</string>
     <string name="pgp_message">PGP message</string>
     <string name="paste">Paste</string>
     <string name="open_file">Open file</string>
@@ -44,13 +45,12 @@
     <string name="passphrase_confirm">Confirm passphrase</string>
     <string name="passphrase_mismatch">The two passphrases do not match.</string>
     <string name="decrypt">Decrypt</string>
-    <string name="decrypting">Decrypting...</string>
+    <string name="decrypting">Decrypting…</string>
     <string name="sig_valid">Valid signature from %1$s</string>
     <string name="sig_invalid">Signature INVALID or from a different key than %1$s. Do not trust the sender.</string>
     <string name="sig_not_signed">Not signed - the sender cannot be verified.</string>
     <string name="sig_not_checked">Decrypted. Signature not checked (no sender key selected).</string>
     <string name="copy">Copy</string>
-    <string name="copy_clears">Copy (clipboard cleared after %1$d s)</string>
     <string name="share">Share</string>
     <string name="recipient_public_key">Recipient\'s public key</string>
     <string name="keyring">Keyring</string>
@@ -62,7 +62,7 @@
     <string name="sign_with">Also sign with \"%1$s\"</string>
     <string name="not_signed_no_profile">No profile selected: the message will not be signed.</string>
     <string name="encrypt">Encrypt</string>
-    <string name="encrypting">Encrypting...</string>
+    <string name="encrypting">Encrypting…</string>
     <string name="encrypted">Successfully encrypted.</string>
     <string name="encrypted_signed">Signed and encrypted successfully.</string>
     <string name="select_file">Select file</string>
@@ -72,7 +72,7 @@
     <string name="also_sign">Also sign when encrypting</string>
     <string name="sign">Sign</string>
     <string name="verify">Verify</string>
-    <string name="working">Working...</string>
+    <string name="working">Working…</string>
     <string name="file_encrypted">File encrypted.</string>
     <string name="file_encrypted_signed">File signed and encrypted.</string>
     <string name="file_decrypted">File decrypted.</string>
@@ -115,7 +115,7 @@
     <string name="validity_never">No expiry</string>
     <string name="validity_years">%1$d y</string>
     <string name="generate">Generate</string>
-    <string name="generating">Generating RSA %1$d key pair - this can take a while...</string>
+    <string name="generating" tools:ignore="PluralsCandidate">Generating RSA %1$d key pair - this can take a while…</string>
     <string name="key_generated">Key pair generated. Save it as a profile and export a backup.</string>
     <string name="save_profile">Save as profile</string>
     <string name="expiry_title">Key expiry</string>

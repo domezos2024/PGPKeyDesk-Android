@@ -237,13 +237,13 @@ private fun AddProfilePane(vm: AppViewModel, prefill: String, onDone: () -> Unit
                 OutlinedButton(onClick = { priv = Clipboard.paste(ctx) }) { Text(stringResource(R.string.paste)) }
                 OutlinedButton(onClick = { loadPriv.launch(arrayOf("*/*")) }) { Text(stringResource(R.string.import_file)) }
             }
-            keyStatus(ctx, pv)
+            KeyStatus(ctx, pv)
             KeyTextField(pub, { pub = it; error = null }, stringResource(R.string.public_key_optional), minLines = 3)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(onClick = { pub = Clipboard.paste(ctx) }) { Text(stringResource(R.string.paste)) }
                 OutlinedButton(onClick = { loadPub.launch(arrayOf("*/*")) }) { Text(stringResource(R.string.import_file)) }
             }
-            keyStatus(ctx, bv)
+            KeyStatus(ctx, bv)
             StatusLine(error?.let { Status(it, Kind.ERROR) })
             Button(
                 onClick = { runCatching { vm.addProfile(name, priv, pub) }.onSuccess { onDone() }.onFailure { error = ctx.errorText(it) } },
@@ -255,7 +255,7 @@ private fun AddProfilePane(vm: AppViewModel, prefill: String, onDone: () -> Unit
 }
 
 @Composable
-private fun keyStatus(ctx: android.content.Context, v: KeyValidationResult?) {
+private fun KeyStatus(ctx: android.content.Context, v: KeyValidationResult?) {
     if (v == null) return
     if (v.isValid) StatusLine(Status(v.keyInfo + "  ·  " + ctx.describeExpiry(v.expiresAt), expiryKind(v.expiryStatus(Instant.now()))))
     else StatusLine(Status(v.errorMessage, Kind.ERROR))

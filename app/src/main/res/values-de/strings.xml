@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">PGPKeyDesk</string>
     <string name="tab_decrypt">Entschl.</string>
     <string name="tab_encrypt">Verschl.</string>
@@ -11,7 +11,10 @@
     <string name="show_hide">Anzeigen oder verbergen</string>
     <string name="key_never_expires">läuft nie ab</string>
     <string name="key_expired_on">ABGELAUFEN am %1$s</string>
-    <string name="key_expires_in">läuft in %1$d Tag(en) ab (%2$s)</string>
+    <plurals name="key_expires_in">
+        <item quantity="one">läuft in %1$d Tag ab (%2$s)</item>
+        <item quantity="other">läuft in %1$d Tagen ab (%2$s)</item>
+    </plurals>
     <string name="key_valid_until">gültig bis %1$s</string>
     <string name="check_invalid">Ungültiger öffentlicher Schlüssel: %1$s</string>
     <string name="check_revoked">Dieser Schlüssel wurde widerrufen.</string>
@@ -30,8 +33,6 @@
     <string name="keyring_empty_long">Der Schlüsselbund ist leer. Mit + einen öffentlichen Schlüssel hinzufügen.</string>
     <string name="cancel">Abbrechen</string>
     <string name="ok">OK</string>
-    <string name="no_profile_hint">Kein Profil gewählt. Zum Entschlüsseln oder Signieren wird ein Profil (dein privater Schlüssel) benötigt.</string>
-    <string name="open_profiles">Profile öffnen</string>
     <string name="pgp_message">PGP-Nachricht</string>
     <string name="paste">Einfügen</string>
     <string name="open_file">Datei öffnen</string>
@@ -44,13 +45,12 @@
     <string name="passphrase_confirm">Passphrase bestätigen</string>
     <string name="passphrase_mismatch">Die Passphrasen stimmen nicht überein.</string>
     <string name="decrypt">Entschlüsseln</string>
-    <string name="decrypting">Entschlüssele...</string>
+    <string name="decrypting">Entschlüssele…</string>
     <string name="sig_valid">Gültige Signatur von %1$s</string>
     <string name="sig_invalid">Signatur UNGÜLTIG oder von einem anderen Schlüssel als %1$s. Dem Absender nicht vertrauen.</string>
     <string name="sig_not_signed">Nicht signiert - der Absender kann nicht geprüft werden.</string>
     <string name="sig_not_checked">Entschlüsselt. Signatur nicht geprüft (kein Absenderschlüssel gewählt).</string>
     <string name="copy">Kopieren</string>
-    <string name="copy_clears">Kopieren (Zwischenablage wird nach %1$d s geleert)</string>
     <string name="share">Teilen</string>
     <string name="recipient_public_key">Öffentlicher Schlüssel des Empfängers</string>
     <string name="keyring">Schlüsselbund</string>
@@ -62,7 +62,7 @@
     <string name="sign_with">Zusätzlich signieren mit „%1$s“</string>
     <string name="not_signed_no_profile">Kein Profil gewählt: die Nachricht wird nicht signiert.</string>
     <string name="encrypt">Verschlüsseln</string>
-    <string name="encrypting">Verschlüssele...</string>
+    <string name="encrypting">Verschlüssele…</string>
     <string name="encrypted">Erfolgreich verschlüsselt.</string>
     <string name="encrypted_signed">Erfolgreich signiert und verschlüsselt.</string>
     <string name="select_file">Datei auswählen</string>
@@ -72,7 +72,7 @@
     <string name="also_sign">Beim Verschlüsseln zusätzlich signieren</string>
     <string name="sign">Signieren</string>
     <string name="verify">Prüfen</string>
-    <string name="working">Verarbeite...</string>
+    <string name="working">Verarbeite…</string>
     <string name="file_encrypted">Datei verschlüsselt.</string>
     <string name="file_encrypted_signed">Datei signiert und verschlüsselt.</string>
     <string name="file_decrypted">Datei entschlüsselt.</string>
@@ -115,7 +115,7 @@
     <string name="validity_never">Unbegrenzt</string>
     <string name="validity_years">%1$d J.</string>
     <string name="generate">Erzeugen</string>
-    <string name="generating">Erzeuge RSA-%1$d-Schlüsselpaar - das kann dauern...</string>
+    <string name="generating" tools:ignore="PluralsCandidate">Erzeuge RSA-%1$d-Schlüsselpaar - das kann dauern…</string>
     <string name="key_generated">Schlüsselpaar erzeugt. Als Profil speichern und eine Sicherung exportieren.</string>
     <string name="save_profile">Als Profil speichern</string>
     <string name="expiry_title">Schlüsselablauf</string>

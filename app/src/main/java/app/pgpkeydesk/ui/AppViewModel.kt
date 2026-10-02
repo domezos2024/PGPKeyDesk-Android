@@ -1,5 +1,6 @@
 package app.pgpkeydesk.ui
 
+import androidx.core.content.edit
 import android.app.Application
 import android.net.Uri
 import androidx.compose.runtime.getValue
@@ -56,7 +57,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     fun select(id: String?) {
         selectedProfileId = id
-        prefs.edit().putString("selected", id).apply()
+        prefs.edit { putString("selected", id) }
     }
 
     fun addProfile(name: String, privateKey: String, publicKey: String): PgpProfile {
