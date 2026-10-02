@@ -129,7 +129,7 @@ fun DecryptScreen(vm: AppViewModel, onOpenProfiles: () -> Unit) {
         }
 
         result?.let { r ->
-            Card(Modifier.fillMaxWidth()) {
+            Card(Modifier.fillMaxWidth(), colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest)) {
                 SelectionContainer {
                     Text(r.text, Modifier.padding(16.dp), style = MaterialTheme.typography.bodyLarge)
                 }

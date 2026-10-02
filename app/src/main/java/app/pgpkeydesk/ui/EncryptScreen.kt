@@ -144,7 +144,7 @@ fun EncryptScreen(vm: AppViewModel) {
         }
 
         if (output.isNotEmpty()) {
-            Card(Modifier.fillMaxWidth()) {
+            Card(Modifier.fillMaxWidth(), colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest)) {
                 SelectionContainer {
                     Text(output, Modifier.padding(16.dp), style = MaterialTheme.typography.bodySmall, fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace)
                 }
