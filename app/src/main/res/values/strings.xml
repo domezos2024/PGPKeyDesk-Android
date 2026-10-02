@@ -129,4 +129,11 @@
     <string name="step_action">2. Action</string>
     <string name="sign_hint">The file is signed with your profile key and saved as a signed .asc file.</string>
     <string name="copied_clears">Copied. The clipboard is cleared in %1$d s.</string>
+    <string name="settings">Settings</string>
+    <string name="appearance">Appearance</string>
+    <string name="theme_system">Follow system</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="language">Language</string>
+    <string name="language_system">System default</string>
 </resources>

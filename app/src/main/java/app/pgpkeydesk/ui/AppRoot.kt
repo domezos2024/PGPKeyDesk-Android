@@ -10,6 +10,8 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -58,6 +60,7 @@ fun AppRoot(vm: AppViewModel) {
     var tab by rememberSaveable { mutableStateOf(Tab.DECRYPT) }
     val holder = rememberSaveableStateHolder()
     val snackbar = remember { SnackbarHostState() }
+    var showSettings by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(vm.profilesAction) { if (vm.profilesAction != null) tab = Tab.PROFILES }
 
@@ -82,6 +85,8 @@ fun AppRoot(vm: AppViewModel) {
                         style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+            }, actions = {
+                IconButton(onClick = { showSettings = true }) { Icon(Icons.Filled.Settings, stringResource(R.string.settings)) }
             })
         },
         snackbarHost = { SnackbarHost(snackbar) },
@@ -109,6 +114,8 @@ fun AppRoot(vm: AppViewModel) {
             }
         }
     }
+
+    if (showSettings) SettingsDialog(onDismiss = { showSettings = false })
 
     if (vm.expiryWarnings.isNotEmpty()) {
         AlertDialog(

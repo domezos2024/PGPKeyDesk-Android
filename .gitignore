@@ -11,3 +11,5 @@
 *.keystore
 codingbeendet.md
 .kotlin/
+
+.shots/

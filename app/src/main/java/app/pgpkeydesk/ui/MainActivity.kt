@@ -4,18 +4,20 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.WindowManager
-import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.core.os.BundleCompat
 import app.pgpkeydesk.BuildConfig
+import app.pgpkeydesk.data.AppSettings
 import app.pgpkeydesk.data.Files
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
     private val vm: AppViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        AppSettings.applyTheme(this)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         // Keys and plaintext must not show up in screenshots or the recent-apps preview.
