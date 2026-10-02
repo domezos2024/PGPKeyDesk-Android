@@ -140,7 +140,11 @@ fun KeyTextField(value: String, onChange: (String) -> Unit, label: String, modif
     )
 }
 
-fun formatFingerprint(fp: String): String = fp.chunked(4).joinToString(" ")
+/** Groups of four hex digits; a 40-digit fingerprint is split into two lines of five groups. */
+fun formatFingerprint(fp: String): String {
+    val groups = fp.chunked(4)
+    return if (groups.size == 10) groups.take(5).joinToString(" ") + "\n" + groups.drop(5).joinToString(" ") else groups.joinToString(" ")
+}
 
 fun Context.describeExpiry(expiresAt: Instant?, now: Instant = Instant.now()): String {
     val date = expiresAt?.atZone(ZoneOffset.UTC)?.toLocalDate()?.toString().orEmpty()
