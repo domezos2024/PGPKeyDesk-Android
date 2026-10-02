@@ -119,4 +119,14 @@
     <string name="key_generated">Key pair generated. Save it as a profile and export a backup.</string>
     <string name="save_profile">Save as profile</string>
     <string name="expiry_title">Key expiry</string>
+    <string name="welcome_title">Welcome to PGPKeyDesk</string>
+    <string name="welcome_text">To decrypt or sign you need a profile: your own key pair. Generate a new one or import an existing private key.</string>
+    <string name="step_message">1. Message</string>
+    <string name="step_unlock">2. Unlock and decrypt</string>
+    <string name="step_recipient">1. Recipient</string>
+    <string name="step_message_enc">2. Message</string>
+    <string name="step_file">1. File</string>
+    <string name="step_action">2. Action</string>
+    <string name="sign_hint">The file is signed with your profile key and saved as a signed .asc file.</string>
+    <string name="copied_clears">Copied. The clipboard is cleared in %1$d s.</string>
 </resources>

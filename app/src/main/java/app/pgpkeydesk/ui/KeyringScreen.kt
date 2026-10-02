@@ -48,6 +48,7 @@ import app.pgpkeydesk.data.Clipboard
 import app.pgpkeydesk.data.Files
 import app.pgpkeydesk.data.RecipientKey
 import java.time.Instant
+import kotlinx.coroutines.launch
 
 @Composable
 fun KeyringScreen(vm: AppViewModel) {
@@ -56,6 +57,8 @@ fun KeyringScreen(vm: AppViewModel) {
     var prefill by remember { mutableStateOf("") }
     var delete by remember { mutableStateOf<RecipientKey?>(null) }
     val now = remember { Instant.now() }
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    val snack = LocalSnackbar.current
 
     LaunchedEffect(vm.incoming) {
         vm.incoming?.text?.takeIf { it.contains(KeyValidator.PUBLIC_HEADER) }?.let {
@@ -79,7 +82,7 @@ fun KeyringScreen(vm: AppViewModel) {
                         val kind = if (check.level == KeyCheckLevel.BLOCKED) Kind.ERROR else if (check.level == KeyCheckLevel.WARNING) Kind.WARN else Kind.OK
                         StatusLine(Status(if (check.level == KeyCheckLevel.BLOCKED && !v.isValid) ctx.checkText(check) else ctx.describeExpiry(v.expiresAt, now).let { d -> if (v.isRevoked) ctx.getString(R.string.check_revoked) else d }, kind))
                         Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
-                            IconButton(onClick = { Clipboard.copy(ctx, k.publicKey, sensitive = false) }) { Icon(Icons.Filled.ContentCopy, stringResource(R.string.copy_public_key)) }
+                            IconButton(onClick = { Clipboard.copy(ctx, k.publicKey, sensitive = false); scope.launch { snack?.showSnackbar(ctx.getString(R.string.copied)) } }) { Icon(Icons.Filled.ContentCopy, stringResource(R.string.copy_public_key)) }
                             IconButton(onClick = { delete = k }) { Icon(Icons.Filled.Delete, stringResource(R.string.delete)) }
                         }
                     }

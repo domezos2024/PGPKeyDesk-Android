@@ -17,6 +17,8 @@ import app.pgpkeydesk.data.RecipientKeyring
 import java.io.File
 import java.time.Instant
 
+enum class ProfilesAction { GENERATE, IMPORT }
+
 data class ExpiryWarning(val name: String, val status: KeyExpiryStatus, val expiresAt: Instant)
 
 /** Content received from outside (share sheet / "open with"). */
@@ -36,6 +38,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         private set
     val expiryWarnings = mutableStateListOf<ExpiryWarning>()
     var incoming by mutableStateOf<Incoming?>(null)
+    var profilesAction by mutableStateOf<ProfilesAction?>(null)
 
     val selectedProfile: PgpProfile? get() = profiles.firstOrNull { it.id == selectedProfileId }
 

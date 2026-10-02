@@ -3,10 +3,18 @@ package app.pgpkeydesk.ui
 import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.Card
+import androidx.compose.material3.Button
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -196,4 +204,33 @@ fun KeyPickerDialog(keys: List<RecipientKey>, onPick: (RecipientKey) -> Unit, on
 @Composable
 fun Column16(modifier: Modifier = Modifier, content: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit) {
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp), content = content)
+}
+
+
+/** Shows short feedback ("Copied") in the app-wide snackbar. */
+val LocalSnackbar = staticCompositionLocalOf<SnackbarHostState?> { null }
+
+@Composable
+fun SectionCard(title: String, modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
+    Card(modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text(title, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
+            content()
+        }
+    }
+}
+
+/** First-run hint: explains why a profile is needed and offers the two ways to get one. */
+@Composable
+fun WelcomeCard(onGenerate: () -> Unit, onImport: () -> Unit) {
+    Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text(stringResource(R.string.welcome_title), style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.welcome_text), style = MaterialTheme.typography.bodyMedium)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(onClick = onGenerate) { Text(stringResource(R.string.generate_key_pair)) }
+                OutlinedButton(onClick = onImport) { Text(stringResource(R.string.import_profile)) }
+            }
+        }
+    }
 }

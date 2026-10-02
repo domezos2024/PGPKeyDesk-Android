@@ -119,4 +119,14 @@
     <string name="key_generated">Schlüsselpaar erzeugt. Als Profil speichern und eine Sicherung exportieren.</string>
     <string name="save_profile">Als Profil speichern</string>
     <string name="expiry_title">Schlüsselablauf</string>
+    <string name="welcome_title">Willkommen bei PGPKeyDesk</string>
+    <string name="welcome_text">Zum Entschlüsseln oder Signieren brauchst du ein Profil: dein eigenes Schlüsselpaar. Erzeuge ein neues oder importiere einen vorhandenen privaten Schlüssel.</string>
+    <string name="step_message">1. Nachricht</string>
+    <string name="step_unlock">2. Freischalten und entschlüsseln</string>
+    <string name="step_recipient">1. Empfänger</string>
+    <string name="step_message_enc">2. Nachricht</string>
+    <string name="step_file">1. Datei</string>
+    <string name="step_action">2. Aktion</string>
+    <string name="sign_hint">Die Datei wird mit dem Schlüssel deines Profils signiert und als signierte .asc-Datei gespeichert.</string>
+    <string name="copied_clears">Kopiert. Die Zwischenablage wird in %1$d s geleert.</string>
 </resources>

@@ -18,6 +18,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Alignment
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -52,6 +57,9 @@ fun AppRoot(vm: AppViewModel) {
     val ctx = LocalContext.current
     var tab by rememberSaveable { mutableStateOf(Tab.DECRYPT) }
     val holder = rememberSaveableStateHolder()
+    val snackbar = remember { SnackbarHostState() }
+
+    LaunchedEffect(vm.profilesAction) { if (vm.profilesAction != null) tab = Tab.PROFILES }
 
     LaunchedEffect(vm.incoming) {
         val inc = vm.incoming ?: return@LaunchedEffect
@@ -76,6 +84,7 @@ fun AppRoot(vm: AppViewModel) {
                 }
             })
         },
+        snackbarHost = { SnackbarHost(snackbar) },
         bottomBar = {
             NavigationBar {
                 Tab.entries.forEach { t ->
@@ -84,14 +93,18 @@ fun AppRoot(vm: AppViewModel) {
             }
         }
     ) { padding ->
-        Box(Modifier.padding(padding).imePadding()) {
-            holder.SaveableStateProvider(tab.name) {
-                when (tab) {
-                    Tab.DECRYPT -> DecryptScreen(vm, onOpenProfiles = { tab = Tab.PROFILES })
-                    Tab.ENCRYPT -> EncryptScreen(vm)
-                    Tab.FILES -> FilesScreen(vm, onOpenProfiles = { tab = Tab.PROFILES })
-                    Tab.KEYRING -> KeyringScreen(vm)
-                    Tab.PROFILES -> ProfilesScreen(vm)
+        Box(Modifier.padding(padding).imePadding().fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+            CompositionLocalProvider(LocalSnackbar provides snackbar) {
+                Box(Modifier.widthIn(max = 640.dp).fillMaxSize()) {
+                    holder.SaveableStateProvider(tab.name) {
+                        when (tab) {
+                            Tab.DECRYPT -> DecryptScreen(vm, onOpenProfiles = { tab = Tab.PROFILES })
+                            Tab.ENCRYPT -> EncryptScreen(vm)
+                            Tab.FILES -> FilesScreen(vm, onOpenProfiles = { tab = Tab.PROFILES })
+                            Tab.KEYRING -> KeyringScreen(vm)
+                            Tab.PROFILES -> ProfilesScreen(vm)
+                        }
+                    }
                 }
             }
         }

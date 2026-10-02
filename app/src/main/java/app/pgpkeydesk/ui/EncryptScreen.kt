@@ -57,6 +57,7 @@ fun EncryptScreen(vm: AppViewModel) {
     var status by remember { mutableStateOf<Status?>(null) }
     var busy by remember { mutableStateOf(false) }
     var picker by remember { mutableStateOf(false) }
+    val snack = LocalSnackbar.current
     val profile = vm.selectedProfile
     val signing = profile != null && sign
 
@@ -95,46 +96,49 @@ fun EncryptScreen(vm: AppViewModel) {
     }
 
     Column16(Modifier.verticalScroll(rememberScrollState()).padding(16.dp)) {
-        KeyTextField(recipient, { recipient = it; output = "" }, stringResource(R.string.recipient_public_key), minLines = 4)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick = { picker = true }) { Text(stringResource(R.string.keyring)) }
-            OutlinedButton(onClick = { recipient = Clipboard.paste(ctx); output = "" }) { Text(stringResource(R.string.paste)) }
-            OutlinedButton(onClick = { importKey.launch(arrayOf("*/*")) }) { Text(stringResource(R.string.import_file)) }
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (profile != null) TextButton(onClick = { recipient = vm.publicKeyOf(profile); output = "" }) { Text(stringResource(R.string.use_own_key)) }
-            if (check != null && check.level != KeyCheckLevel.BLOCKED) {
-                TextButton(onClick = {
-                    status = runCatching { vm.addKey(null, trimmed) }
-                        .map { Status(ctx.getString(R.string.saved_to_keyring, it.name), Kind.OK) }
-                        .getOrElse { Status(ctx.errorText(it), Kind.ERROR) }
-                }) { Text(stringResource(R.string.save_to_keyring)) }
+        SectionCard(stringResource(R.string.step_recipient)) {
+            KeyTextField(recipient, { recipient = it; output = "" }, stringResource(R.string.recipient_public_key), minLines = 4)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(onClick = { picker = true }) { Text(stringResource(R.string.keyring)) }
+                OutlinedButton(onClick = { recipient = Clipboard.paste(ctx); output = "" }) { Text(stringResource(R.string.paste)) }
+                OutlinedButton(onClick = { importKey.launch(arrayOf("*/*")) }) { Text(stringResource(R.string.import_file)) }
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (profile != null) TextButton(onClick = { recipient = vm.publicKeyOf(profile); output = "" }) { Text(stringResource(R.string.use_own_key)) }
+                if (check != null && check.level != KeyCheckLevel.BLOCKED) {
+                    TextButton(onClick = {
+                        status = runCatching { vm.addKey(null, trimmed) }
+                            .map { Status(ctx.getString(R.string.saved_to_keyring, it.name), Kind.OK) }
+                            .getOrElse { Status(ctx.errorText(it), Kind.ERROR) }
+                    }) { Text(stringResource(R.string.save_to_keyring)) }
+                }
+            }
+            if (validation != null && check != null) {
+                if (check.level == KeyCheckLevel.BLOCKED) StatusLine(Status(ctx.checkText(check), Kind.ERROR))
+                else StatusLine(Status(validation.keyInfo + "  ·  " + ctx.describeExpiry(validation.expiresAt), if (check.level == KeyCheckLevel.WARNING) Kind.WARN else Kind.OK))
             }
         }
-        if (validation != null && check != null) {
-            if (check.level == KeyCheckLevel.BLOCKED) StatusLine(Status(ctx.checkText(check), Kind.ERROR))
-            else StatusLine(Status(validation.keyInfo + "  ·  " + ctx.describeExpiry(validation.expiresAt), if (check.level == KeyCheckLevel.WARNING) Kind.WARN else Kind.OK))
-        }
-
-        OutlinedTextField(
-            value = plain, onValueChange = { plain = it; output = "" }, label = { Text(stringResource(R.string.plaintext)) },
-            minLines = 5, maxLines = 12, modifier = Modifier.fillMaxWidth()
-        )
-        if (profile != null) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Switch(checked = sign, onCheckedChange = { sign = it })
-                Text(stringResource(R.string.sign_with, profile.name), Modifier.padding(start = 12.dp))
+        SectionCard(stringResource(R.string.step_message_enc)) {
+            OutlinedTextField(
+                value = plain, onValueChange = { plain = it; output = "" }, label = { Text(stringResource(R.string.plaintext)) },
+                minLines = 5, maxLines = 12, modifier = Modifier.fillMaxWidth()
+            )
+            if (profile != null) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Switch(checked = sign, onCheckedChange = { sign = it })
+                    Text(stringResource(R.string.sign_with, profile.name), Modifier.padding(start = 12.dp))
+                }
+                if (sign) PassphraseField(pass, { pass = it }, stringResource(R.string.passphrase_profile))
+            } else {
+                StatusLine(Status(stringResource(R.string.not_signed_no_profile), Kind.INFO))
             }
-            if (sign) PassphraseField(pass, { pass = it }, stringResource(R.string.passphrase_profile))
-        } else {
-            StatusLine(Status(stringResource(R.string.not_signed_no_profile), Kind.INFO))
+            Button(
+                onClick = ::encrypt,
+                enabled = !busy && trimmed.isNotEmpty() && plain.isNotEmpty() && check?.level != KeyCheckLevel.BLOCKED && (!signing || pass.isNotEmpty()),
+                modifier = Modifier.fillMaxWidth()
+            ) { Text(stringResource(R.string.encrypt)) }
+            if (busy) Busy(stringResource(R.string.encrypting)) else StatusLine(status)
         }
-        Button(
-            onClick = ::encrypt,
-            enabled = !busy && trimmed.isNotEmpty() && plain.isNotEmpty() && check?.level != KeyCheckLevel.BLOCKED && (!signing || pass.isNotEmpty()),
-            modifier = Modifier.fillMaxWidth()
-        ) { Text(stringResource(R.string.encrypt)) }
-        if (busy) Busy(stringResource(R.string.encrypting)) else StatusLine(status)
 
         if (output.isNotEmpty()) {
             Card(Modifier.fillMaxWidth()) {
@@ -142,7 +146,10 @@ fun EncryptScreen(vm: AppViewModel) {
                     Text(output, Modifier.padding(16.dp), style = MaterialTheme.typography.bodySmall, fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace)
                 }
                 Row(Modifier.padding(horizontal = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    TextButton(onClick = { Clipboard.copy(ctx, output, sensitive = false) }) { Text(stringResource(R.string.copy)) }
+                    TextButton(onClick = {
+                        Clipboard.copy(ctx, output, sensitive = false)
+                        scope.launch { snack?.showSnackbar(ctx.getString(R.string.copied)) }
+                    }) { Text(stringResource(R.string.copy)) }
                     TextButton(onClick = {
                         val send = Intent(Intent.ACTION_SEND).apply { type = "text/plain"; putExtra(Intent.EXTRA_TEXT, output) }
                         ctx.startActivity(Intent.createChooser(send, null))

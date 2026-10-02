@@ -98,6 +98,14 @@ fun ProfilesScreen(vm: AppViewModel) {
             prefill = it; sub = Sub.ADD; vm.incoming = null
         }
     }
+    LaunchedEffect(vm.profilesAction) {
+        when (vm.profilesAction) {
+            ProfilesAction.GENERATE -> sub = Sub.GENERATE
+            ProfilesAction.IMPORT -> sub = Sub.ADD
+            null -> {}
+        }
+        vm.profilesAction = null
+    }
     BackHandler(enabled = sub != Sub.LIST) { sub = Sub.LIST }
 
     when (sub) {

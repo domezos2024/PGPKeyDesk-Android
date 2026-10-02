@@ -52,6 +52,7 @@ fun DecryptScreen(vm: AppViewModel, onOpenProfiles: () -> Unit) {
     var status by remember { mutableStateOf<Status?>(null) }
     var busy by remember { mutableStateOf(false) }
     var picker by remember { mutableStateOf(false) }
+    val snack = LocalSnackbar.current
     val profile = vm.selectedProfile
     val incoming = vm.incoming
 
@@ -98,30 +99,31 @@ fun DecryptScreen(vm: AppViewModel, onOpenProfiles: () -> Unit) {
     }
 
     Column16(Modifier.verticalScroll(rememberScrollState()).padding(16.dp)) {
-        if (profile == null) {
-            Card(Modifier.fillMaxWidth()) {
-                Text(stringResource(R.string.no_profile_hint), Modifier.padding(16.dp))
-                TextButton(onClick = onOpenProfiles, modifier = Modifier.padding(start = 8.dp)) { Text(stringResource(R.string.open_profiles)) }
+        if (profile == null) WelcomeCard(
+            onGenerate = { vm.profilesAction = ProfilesAction.GENERATE },
+            onImport = { vm.profilesAction = ProfilesAction.IMPORT }
+        )
+        SectionCard(stringResource(R.string.step_message)) {
+            KeyTextField(cipher, { cipher = it; result = null }, stringResource(R.string.pgp_message), minLines = 6)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(onClick = { cipher = Clipboard.paste(ctx); result = null }) { Text(stringResource(R.string.paste)) }
+                OutlinedButton(onClick = { openFile.launch(arrayOf("*/*")) }) { Text(stringResource(R.string.open_file)) }
+                if (cipher.isNotEmpty()) TextButton(onClick = { cipher = ""; result = null; status = null }) { Text(stringResource(R.string.clear)) }
             }
         }
-        KeyTextField(cipher, { cipher = it; result = null }, stringResource(R.string.pgp_message), minLines = 6)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick = { cipher = Clipboard.paste(ctx); result = null }) { Text(stringResource(R.string.paste)) }
-            OutlinedButton(onClick = { openFile.launch(arrayOf("*/*")) }) { Text(stringResource(R.string.open_file)) }
-            if (cipher.isNotEmpty()) TextButton(onClick = { cipher = ""; result = null; status = null }) { Text(stringResource(R.string.clear)) }
+        SectionCard(stringResource(R.string.step_unlock)) {
+            Text(stringResource(R.string.sender_key_optional), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(onClick = { picker = true }) { Text(sender?.name ?: stringResource(R.string.pick_from_keyring)) }
+                if (sender != null) TextButton(onClick = { sender = null }) { Text(stringResource(R.string.remove)) }
+            }
+            PassphraseField(pass, { pass = it }, stringResource(R.string.passphrase), onDone = { if (!busy && profile != null && cipher.isNotBlank()) decrypt() })
+            Button(
+                onClick = ::decrypt, enabled = !busy && profile != null && cipher.isNotBlank() && pass.isNotEmpty(),
+                modifier = Modifier.fillMaxWidth()
+            ) { Text(stringResource(R.string.decrypt)) }
+            if (busy) Busy(stringResource(R.string.decrypting)) else StatusLine(status)
         }
-        SectionTitle(stringResource(R.string.sender_key_optional))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick = { picker = true }) { Text(sender?.name ?: stringResource(R.string.pick_from_keyring)) }
-            if (sender != null) TextButton(onClick = { sender = null }) { Text(stringResource(R.string.remove)) }
-        }
-        PassphraseField(pass, { pass = it }, stringResource(R.string.passphrase), onDone = { if (!busy && profile != null && cipher.isNotBlank()) decrypt() })
-        Button(
-            onClick = ::decrypt, enabled = !busy && profile != null && cipher.isNotBlank() && pass.isNotEmpty(),
-            modifier = Modifier.fillMaxWidth()
-        ) { Text(stringResource(R.string.decrypt)) }
-        if (busy) Busy(stringResource(R.string.decrypting))
-        else StatusLine(status)
 
         result?.let { r ->
             Card(Modifier.fillMaxWidth()) {
@@ -129,7 +131,10 @@ fun DecryptScreen(vm: AppViewModel, onOpenProfiles: () -> Unit) {
                     Text(r.text, Modifier.padding(16.dp), style = MaterialTheme.typography.bodyLarge)
                 }
                 Row(Modifier.padding(horizontal = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    TextButton(onClick = { Clipboard.copy(ctx, r.text) }) { Text(stringResource(R.string.copy_clears, Clipboard.CLEAR_SECONDS)) }
+                    TextButton(onClick = {
+                        Clipboard.copy(ctx, r.text)
+                        scope.launch { snack?.showSnackbar(ctx.getString(R.string.copied_clears, Clipboard.CLEAR_SECONDS)) }
+                    }) { Text(stringResource(R.string.copy)) }
                     TextButton(onClick = { result = null }) { Text(stringResource(R.string.clear)) }
                 }
             }

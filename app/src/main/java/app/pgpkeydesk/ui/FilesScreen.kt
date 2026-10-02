@@ -12,8 +12,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -54,6 +58,7 @@ fun FilesScreen(vm: AppViewModel, onOpenProfiles: () -> Unit) {
     var recipient by remember { mutableStateOf<RecipientKey?>(null) }
     var senderOrSigner by remember { mutableStateOf<RecipientKey?>(null) }
     var pickFor by remember { mutableStateOf<Int?>(null) } // 0 = recipient, 1 = sender / signer
+    var op by remember { mutableStateOf(Op.ENCRYPT) }
     var sign by remember { mutableStateOf(false) }
     var armor by remember { mutableStateOf(false) }
     var pass by remember { mutableStateOf("") }
@@ -87,7 +92,7 @@ fun FilesScreen(vm: AppViewModel, onOpenProfiles: () -> Unit) {
         }
     }
 
-    fun run(op: Op) {
+    fun run() {
         val uri = input ?: return
         val baseName = info?.name.orEmpty().ifEmpty { "file" }
         val priv = profile?.privateKey
@@ -160,41 +165,63 @@ fun FilesScreen(vm: AppViewModel, onOpenProfiles: () -> Unit) {
 
     val hasFile = input != null
     val hasPriv = profile != null
+    val canRun = !busy && hasFile && when (op) {
+        Op.ENCRYPT -> recipient != null && (!sign || (hasPriv && pass.isNotEmpty()))
+        Op.DECRYPT, Op.SIGN -> hasPriv && pass.isNotEmpty()
+        Op.VERIFY -> senderOrSigner != null
+    }
+    val labels = mapOf(Op.ENCRYPT to R.string.encrypt, Op.DECRYPT to R.string.decrypt, Op.SIGN to R.string.sign, Op.VERIFY to R.string.verify)
     Column16(Modifier.verticalScroll(rememberScrollState()).padding(16.dp)) {
-        OutlinedButton(onClick = { pick.launch(arrayOf("*/*")) }, modifier = Modifier.fillMaxWidth()) {
-            Text(info?.let { "${it.name}  (${formatSize(it.size)})" } ?: stringResource(R.string.select_file))
+        if ((op == Op.DECRYPT || op == Op.SIGN) && !hasPriv) WelcomeCard(
+            onGenerate = { vm.profilesAction = ProfilesAction.GENERATE },
+            onImport = { vm.profilesAction = ProfilesAction.IMPORT }
+        )
+        SectionCard(stringResource(R.string.step_file)) {
+            OutlinedButton(onClick = { pick.launch(arrayOf("*/*")) }, modifier = Modifier.fillMaxWidth()) {
+                Text(info?.let { "${it.name}  (${formatSize(it.size)})" } ?: stringResource(R.string.select_file), maxLines = 1)
+            }
         }
-        SectionTitle(stringResource(R.string.recipient))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick = { pickFor = 0 }) { Text(recipient?.name ?: stringResource(R.string.pick_from_keyring)) }
-            if (recipient != null) TextButton(onClick = { recipient = null }) { Text(stringResource(R.string.remove)) }
+        SectionCard(stringResource(R.string.step_action)) {
+            SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+                Op.entries.forEachIndexed { i, o ->
+                    SegmentedButton(
+                        selected = op == o, onClick = { op = o; status = null },
+                        shape = SegmentedButtonDefaults.itemShape(i, Op.entries.size)
+                    ) { Text(stringResource(labels.getValue(o)), maxLines = 1) }
+                }
+            }
+            when (op) {
+                Op.ENCRYPT -> {
+                    Text(stringResource(R.string.recipient), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedButton(onClick = { pickFor = 0 }) { Text(recipient?.name ?: stringResource(R.string.pick_from_keyring)) }
+                        if (recipient != null) TextButton(onClick = { recipient = null }) { Text(stringResource(R.string.remove)) }
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) { Checkbox(armor, { armor = it }); Text(stringResource(R.string.ascii_armor)) }
+                    Row(verticalAlignment = Alignment.CenterVertically) { Checkbox(sign, { sign = it }, enabled = hasPriv); Text(stringResource(R.string.also_sign)) }
+                }
+                Op.DECRYPT -> {
+                    Text(stringResource(R.string.sender_key_optional), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedButton(onClick = { pickFor = 1 }) { Text(senderOrSigner?.name ?: stringResource(R.string.pick_from_keyring)) }
+                        if (senderOrSigner != null) TextButton(onClick = { senderOrSigner = null }) { Text(stringResource(R.string.remove)) }
+                    }
+                }
+                Op.SIGN -> Text(stringResource(R.string.sign_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Op.VERIFY -> {
+                    Text(stringResource(R.string.sender_or_signer), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedButton(onClick = { pickFor = 1 }) { Text(senderOrSigner?.name ?: stringResource(R.string.pick_from_keyring)) }
+                        if (senderOrSigner != null) TextButton(onClick = { senderOrSigner = null }) { Text(stringResource(R.string.remove)) }
+                    }
+                }
+            }
+            if (op != Op.VERIFY && hasPriv && (op != Op.ENCRYPT || sign)) {
+                PassphraseField(pass, { pass = it }, stringResource(R.string.passphrase_profile_named, profile!!.name), onDone = { if (canRun) run() })
+            }
+            Button(onClick = ::run, enabled = canRun, modifier = Modifier.fillMaxWidth()) { Text(stringResource(labels.getValue(op))) }
+            if (busy) Busy(stringResource(R.string.working)) else StatusLine(status)
         }
-        SectionTitle(stringResource(R.string.sender_or_signer))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick = { pickFor = 1 }) { Text(senderOrSigner?.name ?: stringResource(R.string.pick_from_keyring)) }
-            if (senderOrSigner != null) TextButton(onClick = { senderOrSigner = null }) { Text(stringResource(R.string.remove)) }
-        }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(armor, { armor = it }); Text(stringResource(R.string.ascii_armor))
-        }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(sign, { sign = it }, enabled = hasPriv); Text(stringResource(R.string.also_sign))
-        }
-        if (!hasPriv) {
-            StatusLine(Status(stringResource(R.string.no_profile_hint), Kind.INFO))
-            TextButton(onClick = onOpenProfiles) { Text(stringResource(R.string.open_profiles)) }
-        } else {
-            PassphraseField(pass, { pass = it }, stringResource(R.string.passphrase_profile_named, profile!!.name))
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-            FilledTonalButton(onClick = { run(Op.ENCRYPT) }, enabled = !busy && hasFile && recipient != null && (!sign || pass.isNotEmpty()), modifier = Modifier.weight(1f)) { Text(stringResource(R.string.encrypt)) }
-            FilledTonalButton(onClick = { run(Op.DECRYPT) }, enabled = !busy && hasFile && hasPriv && pass.isNotEmpty(), modifier = Modifier.weight(1f)) { Text(stringResource(R.string.decrypt)) }
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-            FilledTonalButton(onClick = { run(Op.SIGN) }, enabled = !busy && hasFile && hasPriv && pass.isNotEmpty(), modifier = Modifier.weight(1f)) { Text(stringResource(R.string.sign)) }
-            FilledTonalButton(onClick = { run(Op.VERIFY) }, enabled = !busy && hasFile && senderOrSigner != null, modifier = Modifier.weight(1f)) { Text(stringResource(R.string.verify)) }
-        }
-        if (busy) Busy(stringResource(R.string.working)) else StatusLine(status)
         outFile?.let {
             Button(onClick = { save.launch(outName) }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.save_result, outName)) }
         }
