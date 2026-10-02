@@ -284,10 +284,13 @@ private fun GeneratePane(vm: AppViewModel, onDone: () -> Unit) {
         pending = null
     }
     val mismatch = confirm.isNotEmpty() && pass != confirm
-    Column(Modifier.verticalScroll(rememberScrollState())) {
+    val scroll = rememberScrollState()
+    LaunchedEffect(keys) { if (keys != null) scroll.animateScrollTo(0) }
+    Column(Modifier.verticalScroll(scroll)) {
         PaneHeader(stringResource(R.string.generate_key_pair), onDone)
         Column16(Modifier.padding(16.dp)) {
-            OutlinedTextField(name, { name = it }, label = { Text(stringResource(R.string.profile_name)) }, singleLine = true, enabled = !busy && keys == null, modifier = Modifier.fillMaxWidth())
+            if (keys == null) {
+            OutlinedTextField(name, { name = it }, label = { Text(stringResource(R.string.profile_name)) }, singleLine = true, enabled = !busy, modifier = Modifier.fillMaxWidth())
             OutlinedTextField(identity, { identity = it }, label = { Text(stringResource(R.string.identity_hint)) }, singleLine = true, enabled = !busy && keys == null, modifier = Modifier.fillMaxWidth())
             PassphraseField(pass, { pass = it }, stringResource(R.string.passphrase), imeAction = androidx.compose.ui.text.input.ImeAction.Next)
             PassphraseField(confirm, { confirm = it }, stringResource(R.string.passphrase_confirm))
@@ -302,6 +305,7 @@ private fun GeneratePane(vm: AppViewModel, onDone: () -> Unit) {
                     FilterChip(years == y, { years = y }, enabled = !busy && keys == null,
                         label = { Text(if (y == 0) stringResource(R.string.validity_never) else stringResource(R.string.validity_years, y)) })
                 }
+            }
             }
             if (keys == null) {
                 Button(

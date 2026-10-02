@@ -36,6 +36,7 @@ import app.pgpkeydesk.data.Clipboard
 import app.pgpkeydesk.data.Files
 import app.pgpkeydesk.data.RecipientKey
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -53,6 +54,8 @@ fun DecryptScreen(vm: AppViewModel, onOpenProfiles: () -> Unit) {
     var busy by remember { mutableStateOf(false) }
     var picker by remember { mutableStateOf(false) }
     val snack = LocalSnackbar.current
+    val scroll = rememberScrollState()
+    LaunchedEffect(result) { if (result != null) { delay(150); scroll.animateScrollTo(scroll.maxValue) } }
     val profile = vm.selectedProfile
     val incoming = vm.incoming
 
@@ -98,12 +101,12 @@ fun DecryptScreen(vm: AppViewModel, onOpenProfiles: () -> Unit) {
         }
     }
 
-    Column16(Modifier.verticalScroll(rememberScrollState()).padding(16.dp)) {
+    Column16(Modifier.verticalScroll(scroll).padding(16.dp)) {
         if (profile == null) WelcomeCard(
             onGenerate = { vm.profilesAction = ProfilesAction.GENERATE },
             onImport = { vm.profilesAction = ProfilesAction.IMPORT }
         )
-        SectionCard(stringResource(R.string.step_message)) {
+        if (profile != null) SectionCard(stringResource(R.string.step_message)) {
             KeyTextField(cipher, { cipher = it; result = null }, stringResource(R.string.pgp_message), minLines = 6)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(onClick = { cipher = Clipboard.paste(ctx); result = null }) { Text(stringResource(R.string.paste)) }
@@ -111,7 +114,7 @@ fun DecryptScreen(vm: AppViewModel, onOpenProfiles: () -> Unit) {
                 if (cipher.isNotEmpty()) TextButton(onClick = { cipher = ""; result = null; status = null }) { Text(stringResource(R.string.clear)) }
             }
         }
-        SectionCard(stringResource(R.string.step_unlock)) {
+        if (profile != null) SectionCard(stringResource(R.string.step_unlock)) {
             Text(stringResource(R.string.sender_key_optional), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(onClick = { picker = true }) { Text(sender?.name ?: stringResource(R.string.pick_from_keyring)) }

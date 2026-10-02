@@ -39,6 +39,7 @@ import app.pgpkeydesk.core.PgpService
 import app.pgpkeydesk.data.Clipboard
 import app.pgpkeydesk.data.Files
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.Instant
@@ -58,6 +59,8 @@ fun EncryptScreen(vm: AppViewModel) {
     var busy by remember { mutableStateOf(false) }
     var picker by remember { mutableStateOf(false) }
     val snack = LocalSnackbar.current
+    val scroll = rememberScrollState()
+    LaunchedEffect(output) { if (output.isNotEmpty()) { delay(150); scroll.animateScrollTo(scroll.maxValue) } }
     val profile = vm.selectedProfile
     val signing = profile != null && sign
 
@@ -95,7 +98,7 @@ fun EncryptScreen(vm: AppViewModel) {
         }
     }
 
-    Column16(Modifier.verticalScroll(rememberScrollState()).padding(16.dp)) {
+    Column16(Modifier.verticalScroll(scroll).padding(16.dp)) {
         SectionCard(stringResource(R.string.step_recipient)) {
             KeyTextField(recipient, { recipient = it; output = "" }, stringResource(R.string.recipient_public_key), minLines = 4)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
