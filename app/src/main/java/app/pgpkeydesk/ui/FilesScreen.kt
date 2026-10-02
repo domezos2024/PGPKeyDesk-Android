@@ -15,9 +15,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -112,6 +110,88 @@ fun FilesScreen(vm: AppViewModel, onOpenProfiles: () -> Unit) {
                 val msg: Status = withContext(Dispatchers.Default) {
                     ctx.contentResolver.openInputStream(uri)!!.use { ins ->
                         when (op) {
+                            Op.ENCRYPT -> {
+                                tmp.outputStream().buffered().use { out ->
+                                    PgpService.encrypt(ins, out, rec!!.publicKey, if (sign) priv else null, if (sign) pw else null, armor, baseName)
+                                }
+                                Status(ctx.getString(if (sign) R.string.file_encrypted_signed else R.string.file_encrypted), Kind.OK)
+                            }
+                            Op.DECRYPT -> {
+                                val st = tmp.outputStream().buffered().use { out ->
+                                    PgpService.decrypt(ins, out, priv!!, pw, other?.publicKey)
+                                }
+                                when (st) {
+                                    SignatureStatus.VALID -> Status(ctx.getString(R.string.file_decrypted) + " " + ctx.getString(R.string.sig_valid, other?.name.orEmpty()), Kind.OK)
+                                    SignatureStatus.INVALID -> Status(ctx.getString(R.string.file_decrypted) + " " + ctx.getString(R.string.sig_invalid, other?.name.orEmpty()), Kind.ERROR)
+                                    SignatureStatus.NOT_SIGNED -> Status(ctx.getString(R.string.file_decrypted) + " " + ctx.getString(R.string.sig_not_signed), Kind.WARN)
+                                    SignatureStatus.NOT_CHECKED -> Status(ctx.getString(R.string.file_decrypted), Kind.OK)
+                                }
+                            }
+                            Op.SIGN -> {
+                                tmp.outputStream().buffered().use { out -> PgpService.sign(ins, out, priv!!, pw, armor = true, fileName = baseName) }
+                                Status(ctx.getString(R.string.file_signed), Kind.OK)
+                            }
+                            Op.VERIFY -> {
+                                val ok = PgpService.verify(ins, other!!.publicKey)
+                                Status(
+                                    if (ok) ctx.getString(R.string.sig_valid, other.name) else ctx.getString(R.string.sig_invalid, other.name),
+                                    if (ok) Kind.OK else Kind.ERROR
+                                )
+                            }
+                        }
+                    }
+                }
+                status = msg
+                if (op != Op.VERIFY && msg.kind != Kind.ERROR) {
+                    outFile = tmp
+                    outName = when (op) {
+                        Op.ENCRYPT -> baseName + if (armor) ".asc" else ".pgp"
+                        Op.DECRYPT -> baseName.removeSuffix(".pgp").removeSuffix(".gpg").removeSuffix(".asc").let { if (it == baseName) "$baseName.decrypted" else it }
+                        else -> "$baseName.asc"
+                    }
+                    if (op != Op.DECRYPT || msg.kind != Kind.ERROR) pass = ""
+                } else tmp.delete()
+            } catch (e: Throwable) {
+                Log.w(TAG, "op failed: ${e.javaClass.simpleName}")
+                tmp.delete()
+                status = Status(ctx.errorText(e), Kind.ERROR)
+            } finally {
+                busy = false
+            }
+        }
+    }
+
+    val hasFile = input != null
+    val hasPriv = profile != null
+    val canRun = !busy && hasFile && when (op) {
+        Op.ENCRYPT -> recipient != null && (!sign || (hasPriv && pass.isNotEmpty()))
+        Op.DECRYPT, Op.SIGN -> hasPriv && pass.isNotEmpty()
+        Op.VERIFY -> senderOrSigner != null
+    }
+    val labels = mapOf(Op.ENCRYPT to R.string.encrypt, Op.DECRYPT to R.string.decrypt, Op.SIGN to R.string.sign, Op.VERIFY to R.string.verify)
+    Column16(Modifier.verticalScroll(rememberScrollState()).padding(16.dp)) {
+        if ((op == Op.DECRYPT || op == Op.SIGN) && !hasPriv) WelcomeCard(
+            onGenerate = { vm.profilesAction = ProfilesAction.GENERATE },
+            onImport = { vm.profilesAction = ProfilesAction.IMPORT }
+        )
+        SectionCard(stringResource(R.string.step_file)) {
+            OutlinedButton(onClick = { pick.launch(arrayOf("*/*")) }, modifier = Modifier.fillMaxWidth()) {
+                Text(info?.let { "${it.name}  (${formatSize(it.size)})" } ?: stringResource(R.string.select_file), maxLines = 1)
+            }
+        }
+        SectionCard(stringResource(R.string.step_action)) {
+            Op.entries.chunked(2).forEach { pair ->
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    pair.forEach { o ->
+                        FilterChip(
+                            selected = op == o, onClick = { op = o; status = null },
+                            label = { Text(stringResource(labels.getValue(o)), maxLines = 1, modifier = Modifier.fillMaxWidth(), textAlign = androidx.compose.ui.text.style.TextAlign.Center) },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+            }
+            when (op) {
                             Op.ENCRYPT -> {
                                 tmp.outputStream().buffered().use { out ->
                                     PgpService.encrypt(ins, out, rec!!.publicKey, if (sign) priv else null, if (sign) pw else null, armor, baseName)

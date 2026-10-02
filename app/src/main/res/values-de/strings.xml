@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">PGPKeyDesk</string>
-    <string name="tab_decrypt">Entschlüsseln</string>
-    <string name="tab_encrypt">Verschlüsseln</string>
+    <string name="tab_decrypt">Entschl.</string>
+    <string name="tab_encrypt">Verschl.</string>
     <string name="tab_files">Dateien</string>
-    <string name="tab_keyring">Schlüsselbund</string>
+    <string name="tab_keyring">Schlüssel</string>
     <string name="tab_profiles">Profile</string>
     <string name="active_profile">Profil: %1$s</string>
     <string name="no_active_profile">Kein Profil gewählt</string>
